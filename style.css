@@ -1,0 +1,195 @@
+:root {
+  --bg: #f6f6f4;
+  --surface: #ffffff;
+  --text: #15151e;
+  --muted: #5c5c66;
+  --border: #d9d9de;
+  --accent: #e10600;
+  --accent-text: #ffffff;
+  --chip-off: #ececef;
+  --group-a: #c8102e;
+  --group-b: #00756f;
+  --group-c: #a14a00;
+  --group-d: #1f4fd1;
+  --slice-text: #ffffff;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101015;
+    --surface: #1b1b23;
+    --text: #f2f2f5;
+    --muted: #a3a3ad;
+    --border: #33333f;
+    --chip-off: #2a2a34;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #101015;
+  --surface: #1b1b23;
+  --text: #f2f2f5;
+  --muted: #a3a3ad;
+  --border: #33333f;
+  --chip-off: #2a2a34;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Titillium Web', system-ui, sans-serif;
+  line-height: 1.4;
+}
+
+.flag {
+  height: 12px;
+  background: repeating-conic-gradient(var(--text) 0 25%, var(--bg) 0 50%) 0 0 / 12px 12px;
+}
+
+main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+  display: grid;
+  gap: 24px;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2rem, 6vw, 3rem);
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: -0.01em;
+}
+
+h1::after {
+  content: '';
+  display: block;
+  width: 64px;
+  height: 4px;
+  margin-top: 4px;
+  background: var(--accent);
+}
+
+h2 { margin: 0 0 4px; font-size: 1.25rem; }
+.lede, .hint { margin: 4px 0 0; color: var(--muted); }
+.hint { margin-bottom: 12px; }
+
+.groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.group {
+  margin: 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--group-color);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.group.off { opacity: 0.5; }
+
+.group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.group input { width: 18px; height: 18px; accent-color: var(--group-color); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+
+.chip {
+  font: inherit;
+  font-size: 0.9rem;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--group-color);
+  background: var(--group-color);
+  color: var(--slice-text);
+  cursor: pointer;
+}
+
+.chip[aria-pressed="false"] {
+  background: var(--chip-off);
+  color: var(--muted);
+  border-color: var(--border);
+  text-decoration: line-through;
+}
+
+.chip:disabled { cursor: not-allowed; }
+
+.track { display: grid; justify-items: center; gap: 16px; }
+
+.wheel {
+  position: relative;
+  width: min(100%, 480px);
+  aspect-ratio: 1;
+}
+
+#rotor {
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 50%;
+  transition: transform 5.5s cubic-bezier(0.1, 0.75, 0.1, 1);
+}
+
+.pointer {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  z-index: 1;
+  width: 0;
+  height: 0;
+  transform: translateX(-50%);
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  border-top: 28px solid var(--accent);
+  filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.35));
+}
+
+.slice { stroke: var(--surface); stroke-width: 0.6; }
+.slice-label { fill: var(--slice-text); font-weight: 600; }
+.hub { fill: var(--surface); stroke: var(--text); stroke-width: 2; }
+.empty { fill: var(--chip-off); stroke: var(--border); }
+.empty-label { fill: var(--muted); font-size: 10px; }
+
+.spin {
+  font: inherit;
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 10px 40px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--accent-text);
+  cursor: pointer;
+}
+
+.spin:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.spin:focus-visible, .chip:focus-visible, .group input:focus-visible {
+  outline: 3px solid var(--text);
+  outline-offset: 2px;
+}
+
+.result { margin: 0; min-height: 4.5rem; text-align: center; }
+.result strong { display: block; font-size: clamp(2rem, 8vw, 3rem); line-height: 1.1; }
+.result span { color: var(--muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  #rotor { transition-duration: 0.8s; }
+}

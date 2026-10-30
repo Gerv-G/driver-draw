@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Driver Draw</title>
+  <meta name="description" content="Draws a driver to take over a retired driver's rig for free practice.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700&display=swap">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <div class="flag" aria-hidden="true"></div>
+  <main>
+    <header>
+      <h1>Driver Draw</h1>
+      <p class="lede">A driver retired? Pick the groups to draw from, then spin for who gets the rest of the session.</p>
+    </header>
+
+    <section aria-labelledby="groups-heading">
+      <h2 id="groups-heading">Who's in the draw</h2>
+      <p class="hint">Untick a group to leave it out. Tap a name to leave out one driver.</p>
+      <div id="groups" class="groups"></div>
+    </section>
+
+    <section class="track" aria-label="Roulette">
+      <div class="wheel">
+        <div class="pointer" aria-hidden="true"></div>
+        <svg id="rotor" viewBox="-100 -100 200 200" role="img" aria-label="Roulette wheel"></svg>
+      </div>
+      <button id="spin" class="spin" type="button">Spin</button>
+      <p id="result" class="result" aria-live="polite"></p>
+    </section>
+  </main>
+</body>
+</html>

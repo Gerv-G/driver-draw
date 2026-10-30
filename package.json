@@ -1,0 +1,8 @@
+{
+  "name": "driver-draw",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  }
+}
