@@ -1,0 +1,36 @@
+index.html
+  s_5496959c853d63::t_a511709bf828a0 1-38
+app.js
+  s_5496959c853d63::t_ea173cc6c868aa 1-109,111,115-151
+  s_5496959c853d63::t_ed3774a54b6a9f 110,112-114
+style.css
+  s_5496959c853d63::t_38086987c153ba 1-195
+groups.js
+  s_5496959c853d63::t_bca8a4263cd120 1-7
+.gitignore
+  s_5496959c853d63::t_55b9bbece5349d 1
+test/draw.test.js
+  s_5496959c853d63::t_ad0f3d4e9c2142 1-37
+README.md
+  s_5496959c853d63::t_7e30863e0af41b 1-22
+draw.js
+  s_5496959c853d63::t_50d0ef4c4d9d1d 1-28
+package.json
+  s_5496959c853d63::t_025c20605d84ce 1-8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1a8f935df4e0a7eb170b628a8ce17972a5ec43fd",
+  "prompts": {},
+  "sessions": {
+    "s_5496959c853d63": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b4219c8f-6439-4079-bc64-ef070a71cc97",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Gerv-G <25771885+Gerv-G@users.noreply.github.com>"
+    }
+  }
+}
