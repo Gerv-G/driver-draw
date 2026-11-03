@@ -1,0 +1,37 @@
+roster.js
+  s_5496959c853d63::t_b8dd2e4a0f78a4 1-39
+README.md
+  s_5496959c853d63::t_8c3fab92080c91 3,5-6,8
+draw-view.js
+  s_5496959c853d63::t_2ca2e580258a37 1-151
+index.html
+  s_5496959c853d63::t_94b6b3ade0208c 7,19-22,25-44,47-58
+groups-view.js
+  s_5496959c853d63::t_b812012e70d6ee 1-96
+test/roster.test.js
+  s_5496959c853d63::t_fdfc404c001556 1-73
+groups.js
+  s_5496959c853d63::t_bec08b032aef32 1-6,13-14
+  s_5496959c853d63::t_d46f3f92d07cf9 7-12,15-28
+style.css
+  s_5496959c853d63::t_f3e7bde28a31ed 81-152
+  s_5496959c853d63::t_4cef6d9a728687 194
+app.js
+  s_5496959c853d63::t_aa37279990ee7b 1-20,23-28,30,33-37,39,42,44-51,54-55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2ed0a991b744e2d09ae08e1199ab9b734cff881b",
+  "prompts": {},
+  "sessions": {
+    "s_5496959c853d63": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b4219c8f-6439-4079-bc64-ef070a71cc97",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Gerv-G <25771885+Gerv-G@users.noreply.github.com>"
+    }
+  }
+}
