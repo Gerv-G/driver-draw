@@ -1,37 +1,54 @@
-import { DRIVERS } from './groups.js';
-import { normalise } from './roster.js';
+import { changesBetween, normalise } from './roster.js';
+import { createAttendeesView } from './attendees-view.js';
 import { createDrawView } from './draw-view.js';
 import { createGroupsView } from './groups-view.js';
 
-const STORAGE_KEY = 'driver-draw:roster';
-const published = normalise(DRIVERS);
-const publishedKey = JSON.stringify(published);
+const LOADING_TIMEOUT_MS = 10000;
 
-let roster = loadRoster();
+const status = document.querySelector('#status');
+let roster = [];
+let drivers = null;
+// null means the platform hasn't said, so controls stay on until a save is refused
+let writeAllowed = null;
 
-function loadRoster() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    // Edits only make sense against the groups they were made on, so newly published groups win
-    if (saved?.published === publishedKey) return saved.roster;
-  } catch (error) {
-    console.warn('Could not read the groups saved in this browser, so using the published ones', error);
+const canWrite = () => drivers !== null && writeAllowed !== false;
+
+function showStatus(message) {
+  status.textContent = message;
+  status.hidden = message === '';
+}
+
+function handleSaveError(error, what) {
+  if (error?.code === 'invalid_argument' && writeAllowed === null) {
+    writeAllowed = false;
+    showStatus("You can view the groups but not change them. Ask the organisers for edit access.");
+    render();
+    return;
   }
-  return published;
+  showStatus(`Couldn't save ${what}. Check the connection and try again.`);
+  console.error(`Saving ${what} failed`, error);
 }
 
 function setRoster(next) {
-  roster = next;
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ published: publishedKey, roster }));
-  } catch (error) {
-    console.warn('Could not save the groups in this browser, so they reset on reload', error);
+  if (!canWrite()) return;
+  for (const { name, fields } of changesBetween(roster, next)) {
+    const driver = roster.find((d) => d.name === name);
+    drivers.doc(driver.id).update(fields).catch((error) => handleSaveError(error, `${name}'s change`));
   }
-  render();
+}
+
+async function addDriver(name) {
+  if (!canWrite()) return;
+  try {
+    await drivers.add({ name, attending: true, group: null, locked: false });
+  } catch (error) {
+    handleSaveError(error, name);
+  }
 }
 
 const views = [
-  createGroupsView({ getRoster: () => roster, setRoster, resetRoster: () => setRoster(published) }),
+  createAttendeesView({ getRoster: () => roster, setRoster, addDriver, canWrite }),
+  createGroupsView({ getRoster: () => roster, setRoster, canWrite }),
   createDrawView(() => roster),
 ];
 
@@ -51,6 +68,37 @@ function showPanel() {
   }
 }
 
+async function connect() {
+  const db = await window.claude?.use('db');
+  if (!db) {
+    showStatus('Open this page on claude.ai, signed in, to see the groups.');
+    render();
+    return;
+  }
+
+  const user = await window.claude.use('user');
+  writeAllowed = user ? await user.can('data.write') : null;
+  if (writeAllowed === false) showStatus("You can view the groups but not change them. Ask the organisers for edit access.");
+  drivers = db.collection('drivers');
+
+  const loading = setTimeout(() => showStatus("Can't reach the shared groups yet. Check the connection."), LOADING_TIMEOUT_MS);
+  drivers.onSnapshot((snapshot) => {
+    if (!snapshot.metadata.fromCache) {
+      clearTimeout(loading);
+      if (status.textContent.startsWith("Can't reach")) showStatus('');
+    }
+    roster = normalise(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+    render();
+  }, (error) => {
+    clearTimeout(loading);
+    drivers = null;
+    showStatus('Lost the connection to the shared groups. Reload the page to reconnect.');
+    console.error('Driver list subscription ended', error);
+    render();
+  });
+}
+
 window.addEventListener('hashchange', showPanel);
 showPanel();
 render();
+connect();

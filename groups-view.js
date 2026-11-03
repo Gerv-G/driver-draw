@@ -1,13 +1,15 @@
 import { GROUP_IDS } from './groups.js';
 import { membersOf, shuffleIntoGroups, updateDriver } from './roster.js';
 
-export function createGroupsView({ getRoster, setRoster, resetRoster }) {
+export function createGroupsView({ getRoster, setRoster, canWrite }) {
   const board = document.querySelector('#roster');
   const dialog = document.querySelector('#driver-dialog');
   const dialogTitle = document.querySelector('#driver-name');
   const groupPicker = document.querySelector('#group-picker');
   const lockedInput = document.querySelector('#locked');
-  const attendingInput = document.querySelector('#attending');
+  const shuffleButton = document.querySelector('#shuffle');
+  const confirmBar = document.querySelector('#shuffle-confirm');
+  const notComing = document.querySelector('#not-coming');
   let editing = null;
 
   groupPicker.append(...GROUP_IDS.map((id) => {
@@ -26,30 +28,32 @@ export function createGroupsView({ getRoster, setRoster, resetRoster }) {
 
   function edit(changes) {
     setRoster(updateDriver(getRoster(), editing, changes));
-    fillDialog();
   }
 
   groupPicker.addEventListener('change', (event) => edit({ group: event.target.value }));
   lockedInput.addEventListener('change', () => edit({ locked: lockedInput.checked }));
-  attendingInput.addEventListener('change', () => edit({ attending: attendingInput.checked }));
 
-  document.querySelector('#shuffle').addEventListener('click', () => {
-    if (!window.confirm("Reshuffle everyone who's coming and isn't locked?")) return;
+  // The viewer blocks window.confirm, so the page asks for itself
+  shuffleButton.addEventListener('click', () => { confirmBar.hidden = false; });
+  document.querySelector('#shuffle-cancel').addEventListener('click', () => { confirmBar.hidden = true; });
+  document.querySelector('#shuffle-go').addEventListener('click', () => {
+    confirmBar.hidden = true;
     setRoster(shuffleIntoGroups(getRoster(), GROUP_IDS));
-  });
-
-  document.querySelector('#reset').addEventListener('click', () => {
-    if (!window.confirm('Undo every change made on this device and go back to the published groups?')) return;
-    resetRoster();
   });
 
   function fillDialog() {
     const driver = getRoster().find(({ name }) => name === editing);
+    if (!driver) {
+      dialog.close();
+      return;
+    }
     dialogTitle.textContent = driver.name;
-    for (const radio of groupPicker.querySelectorAll('input')) radio.checked = radio.value === driver.group;
+    for (const radio of groupPicker.querySelectorAll('input')) {
+      radio.checked = radio.value === driver.group;
+      radio.disabled = !canWrite();
+    }
     lockedInput.checked = driver.locked;
-    lockedInput.disabled = driver.group === null;
-    attendingInput.checked = driver.attending;
+    lockedInput.disabled = !canWrite() || driver.group === null;
   }
 
   function openDialog(name) {
@@ -61,7 +65,7 @@ export function createGroupsView({ getRoster, setRoster, resetRoster }) {
   function chip(driver) {
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = driver.attending ? 'chip' : 'chip muted';
+    button.className = 'chip';
     button.textContent = driver.locked ? `${driver.name} 🔒` : driver.name;
     button.setAttribute('aria-haspopup', 'dialog');
     if (driver.locked) button.setAttribute('aria-label', `${driver.name}, locked`);
@@ -86,10 +90,13 @@ export function createGroupsView({ getRoster, setRoster, resetRoster }) {
     const roster = getRoster();
     const cards = GROUP_IDS.map((id) => card(`Group ${id}`, membersOf(roster, id), `var(--group-${id.toLowerCase()})`));
     const noGroup = roster.filter((driver) => driver.attending && driver.group === null);
-    const notComing = roster.filter((driver) => !driver.attending);
     if (noGroup.length > 0) cards.push(card('No group yet', noGroup, 'var(--muted)'));
-    if (notComing.length > 0) cards.push(card('Not coming', notComing, 'var(--border)'));
     board.replaceChildren(...cards);
+
+    const away = roster.filter((driver) => !driver.attending).length;
+    notComing.textContent = away === 0 ? '' : `${away} not coming, so not shown. Change that on the Attendees page.`;
+    shuffleButton.disabled = !canWrite();
+    if (dialog.open) fillDialog();
   }
 
   return { render };

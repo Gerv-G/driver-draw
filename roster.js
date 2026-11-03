@@ -1,7 +1,25 @@
 import { cryptoRandom, pickIndex } from './draw.js';
 
+const FIELDS = ['attending', 'group', 'locked'];
+
 export function normalise(drivers) {
-  return drivers.map(({ name, group = null, attending = true, locked = false }) => ({ name, group, attending, locked }));
+  return drivers.map(({ name, group = null, attending = true, locked = false, ...rest }) => ({ ...rest, name, group, attending, locked }));
+}
+
+// What to save to turn `before` into `after`: only the fields that changed, per driver
+export function changesBetween(before, after) {
+  const previous = new Map(before.map((driver) => [driver.name, driver]));
+  return after.flatMap((driver) => {
+    const old = previous.get(driver.name);
+    if (!old) return [];
+    const fields = Object.fromEntries(FIELDS.filter((field) => old[field] !== driver[field]).map((field) => [field, driver[field]]));
+    return Object.keys(fields).length > 0 ? [{ name: driver.name, fields }] : [];
+  });
+}
+
+export function isNameTaken(roster, name) {
+  const wanted = name.trim().toLowerCase();
+  return roster.some((driver) => driver.name.toLowerCase() === wanted);
 }
 
 export function updateDriver(roster, name, changes) {
