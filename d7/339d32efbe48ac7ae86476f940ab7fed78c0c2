@@ -1,0 +1,19 @@
+README.md
+  s_5496959c853d63::t_6c0e6453266d4b 3,5-6,9,11,13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d7339d32efbe48ac7ae86476f940ab7fed78c0c2",
+  "prompts": {},
+  "sessions": {
+    "s_5496959c853d63": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b4219c8f-6439-4079-bc64-ef070a71cc97",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Gerv-G <25771885+Gerv-G@users.noreply.github.com>"
+    }
+  }
+}
