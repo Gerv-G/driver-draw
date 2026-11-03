@@ -1,0 +1,33 @@
+index.html
+  s_5496959c853d63::t_71ac30fafd89e1 1-8,10-45,47-48,50-52,54-64,66-69,71-74,76-80
+style.css
+  s_5496959c853d63::t_b97066920caac8 58-60,65-160
+test/roster.test.js
+  s_5496959c853d63::t_3b469dd6391b3b 3
+  s_5496959c853d63::t_ab85c5b48ee417 20-43
+roster.js
+  s_5496959c853d63::t_378284c6329306 3-4,6-22
+attendees-view.js
+  s_5496959c853d63::t_aace16ac657427 1-63
+app.js
+  s_5496959c853d63::t_f649ec3fd627e0 24,81
+  s_5496959c853d63::t_e6d5ce4fc605fc 1-2,6,8-12,14-23,25-26,28-29,33-41,43,45,50-51,71-80,82-100,104
+groups-view.js
+  s_5496959c853d63::t_5ed30c6c5bd86d 4,10-12,36-40,46-49,51-54,56,68,95-99
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4c925754474d3b80599146e1eb7cc6a193e14145",
+  "prompts": {},
+  "sessions": {
+    "s_5496959c853d63": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b4219c8f-6439-4079-bc64-ef070a71cc97",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Gerv-G <25771885+Gerv-G@users.noreply.github.com>"
+    }
+  }
+}
