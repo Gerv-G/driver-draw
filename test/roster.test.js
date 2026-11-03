@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { membersOf, normalise, shuffleIntoGroups, updateDriver } from '../roster.js';
+import { changesBetween, isNameTaken, membersOf, normalise, shuffleIntoGroups, updateDriver } from '../roster.js';
 
 const GROUP_IDS = ['A', 'B', 'C', 'D'];
 const names = (drivers) => drivers.map((driver) => driver.name).sort();
@@ -15,6 +15,30 @@ function groupSizes(roster) {
 
 test('normalise fills in defaults for a bare name', () => {
   assert.deepEqual(normalise([{ name: 'Kier' }]), [{ name: 'Kier', group: null, attending: true, locked: false }]);
+});
+
+test('normalise keeps extra fields such as the stored id', () => {
+  assert.equal(normalise([{ id: 'kier', name: 'Kier' }])[0].id, 'kier');
+});
+
+test('changesBetween lists only the fields that changed, per driver', () => {
+  const before = normalise([{ name: 'Kier', group: 'A' }, { name: 'Rob', group: 'A' }, { name: 'Sean', group: 'B' }]);
+  const after = updateDriver(updateDriver(before, 'Kier', { group: 'D', locked: true }), 'Sean', { attending: false });
+  assert.deepEqual(changesBetween(before, after), [
+    { name: 'Kier', fields: { group: 'D', locked: true } },
+    { name: 'Sean', fields: { attending: false } },
+  ]);
+});
+
+test('changesBetween is empty when nothing changed', () => {
+  const roster = normalise([{ name: 'Kier', group: 'A' }]);
+  assert.deepEqual(changesBetween(roster, shuffleIntoGroups(roster, ['A'])), []);
+});
+
+test('isNameTaken ignores case and surrounding spaces', () => {
+  const roster = normalise([{ name: 'Kier' }]);
+  assert.equal(isNameTaken(roster, '  kier '), true);
+  assert.equal(isNameTaken(roster, 'Kiera'), false);
 });
 
 test('updateDriver changes only the named driver', () => {
