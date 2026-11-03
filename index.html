@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Driver Draw</title>
-  <meta name="description" content="Draws a driver to take over a retired driver's rig for free practice.">
+  <meta name="description" content="Sorts drivers into qualifier groups, and draws a driver to take over a retired driver's rig.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700&display=swap">
@@ -16,22 +16,47 @@
   <main>
     <header>
       <h1>Driver Draw</h1>
-      <p class="lede">A driver retired? Pick the groups to draw from, then spin for who gets the rest of the session.</p>
+      <nav class="tabs" aria-label="Tools">
+        <a href="#groups">Groups</a>
+        <a href="#draw">Draw</a>
+      </nav>
     </header>
 
-    <section aria-labelledby="groups-heading">
-      <h2 id="groups-heading">Who's in the draw</h2>
-      <p class="hint">Untick a group to leave it out. Tap a name to leave out one driver.</p>
-      <div id="groups" class="groups"></div>
+    <section id="groups-panel" aria-labelledby="groups-heading">
+      <h2 id="groups-heading">Qualifier groups</h2>
+      <p class="hint">Groups drive in order, A first. Tap a driver to move them, lock them in their group, or mark them as not coming. Shuffling leaves locked drivers where they are. Changes are saved on this device only.</p>
+      <div class="toolbar">
+        <button id="shuffle" class="spin" type="button">Shuffle</button>
+        <button id="reset" class="secondary" type="button">Reset to published groups</button>
+      </div>
+      <div id="roster" class="groups"></div>
+
+      <dialog id="driver-dialog" aria-labelledby="driver-name">
+        <form method="dialog">
+          <h3 id="driver-name"></h3>
+          <fieldset id="group-picker" class="picker">
+            <legend>Group</legend>
+          </fieldset>
+          <label class="toggle"><input id="locked" type="checkbox"> Lock in this group when shuffling</label>
+          <label class="toggle"><input id="attending" type="checkbox"> Coming</label>
+          <button class="spin" type="submit">Done</button>
+        </form>
+      </dialog>
     </section>
 
-    <section class="track" aria-label="Roulette">
-      <div class="wheel">
-        <div class="pointer" aria-hidden="true"></div>
-        <svg id="rotor" viewBox="-100 -100 200 200" role="img" aria-label="Roulette wheel"></svg>
+    <section id="draw-panel" aria-labelledby="draw-heading" hidden>
+      <h2 id="draw-heading">Retirement draw</h2>
+      <p class="hint">A driver retired? Pick the groups to draw from, then spin for who gets the rest of the session. Untick a group to leave it out. Tap a name to leave out one driver.</p>
+      <div id="draw-groups" class="groups"></div>
+
+      <div class="track" aria-label="Roulette">
+        <div class="wheel">
+          <div class="pointer" aria-hidden="true"></div>
+          <svg id="rotor" viewBox="-100 -100 200 200" role="img" aria-label="Roulette wheel"></svg>
+        </div>
+        <button id="spin" class="spin" type="button">Spin</button>
+        <p id="result" class="result" aria-live="polite"></p>
       </div>
-      <button id="spin" class="spin" type="button">Spin</button>
-      <p id="result" class="result" aria-live="polite"></p>
     </section>
   </main>
 </body>
