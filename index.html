@@ -14,6 +14,7 @@
     <nav class="tabs" aria-label="Pages">
       <a href="#attendees">Attendees</a>
       <a href="#groups">Groups</a>
+      <a href="#laps">Lap times</a>
       <a href="#draw">Draw</a>
     </nav>
   </header>
@@ -61,6 +62,23 @@
         <button class="spin" type="submit">Done</button>
       </form>
     </dialog>
+  </section>
+
+  <section id="laps-panel" aria-labelledby="laps-heading" hidden>
+    <h2 id="laps-heading">Lap times</h2>
+    <p class="hint">Each driver's fastest lap so far. Save a time after every attempt: only a faster lap replaces their best.</p>
+    <form id="lap-form" class="lap-form" novalidate>
+      <div class="lap-fields">
+        <label for="lap-driver">Driver</label>
+        <select id="lap-driver"></select>
+        <label for="lap-time">Lap time</label>
+        <input id="lap-time" type="text" inputmode="decimal" autocomplete="off" placeholder="2:31.402" maxlength="10">
+      </div>
+      <button id="lap-save" class="spin" type="submit">Save lap</button>
+      <p id="lap-message" class="lap-message" aria-live="polite"></p>
+    </form>
+    <p id="leaderboard-empty" class="hint">No lap times yet. The first saved lap shows up here.</p>
+    <ol id="leaderboard" class="leaderboard"></ol>
   </section>
 
   <section id="draw-panel" aria-labelledby="draw-heading" hidden>

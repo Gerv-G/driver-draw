@@ -2,6 +2,7 @@ import { changesBetween, normalise } from './roster.js';
 import { createAttendeesView } from './attendees-view.js';
 import { createDrawView } from './draw-view.js';
 import { createGroupsView } from './groups-view.js';
+import { createLapsView } from './laps-view.js';
 
 const LOADING_TIMEOUT_MS = 10000;
 
@@ -40,15 +41,28 @@ function setRoster(next) {
 async function addDriver(name) {
   if (!canWrite()) return;
   try {
-    await drivers.add({ name, attending: true, group: null, locked: false });
+    await drivers.add({ name, attending: true, group: null, locked: false, bestLapMs: null });
   } catch (error) {
     handleSaveError(error, name);
+  }
+}
+
+async function saveLap(name, bestLapMs) {
+  if (!canWrite()) return false;
+  const driver = roster.find((d) => d.name === name);
+  try {
+    await drivers.doc(driver.id).update({ bestLapMs });
+    return true;
+  } catch (error) {
+    handleSaveError(error, `${name}'s lap time`);
+    return false;
   }
 }
 
 const views = [
   createAttendeesView({ getRoster: () => roster, setRoster, addDriver, canWrite }),
   createGroupsView({ getRoster: () => roster, setRoster, canWrite }),
+  createLapsView({ getRoster: () => roster, saveLap, canWrite }),
   createDrawView(() => roster),
 ];
 

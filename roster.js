@@ -3,7 +3,7 @@ import { cryptoRandom, pickIndex } from './draw.js';
 const FIELDS = ['attending', 'group', 'locked'];
 
 export function normalise(drivers) {
-  return drivers.map(({ name, group = null, attending = true, locked = false, ...rest }) => ({ ...rest, name, group, attending, locked }));
+  return drivers.map(({ name, group = null, attending = true, locked = false, bestLapMs = null, ...rest }) => ({ ...rest, name, group, attending, locked, bestLapMs }));
 }
 
 // What to save to turn `before` into `after`: only the fields that changed, per driver

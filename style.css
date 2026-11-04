@@ -155,6 +155,80 @@ main {
 
 .confirm p { margin: 0 0 8px; font-weight: 600; }
 
+.lap-form { display: grid; gap: 10px; max-width: 420px; margin-bottom: 16px; justify-items: start; }
+
+.lap-fields {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 8px 12px;
+  width: 100%;
+}
+
+.lap-fields label { font-weight: 600; }
+
+.lap-fields select, .lap-fields input {
+  min-width: 0;
+  font: inherit;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.lap-fields input { font-variant-numeric: tabular-nums; }
+.lap-fields select:focus-visible, .lap-fields input:focus-visible { outline: 3px solid var(--text); outline-offset: 1px; }
+.lap-message { margin: 0; min-height: 1.4em; }
+
+.leaderboard { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-width: 560px; }
+
+.lap-row {
+  display: grid;
+  grid-template-columns: 2ch 1fr auto auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  font-variant-numeric: tabular-nums;
+}
+
+.lap-row.finalist { border-left: 4px solid var(--accent); }
+.lap-place { font-weight: 700; text-align: right; }
+.lap-name { font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.lap-time { font-weight: 700; }
+.lap-gap { color: var(--muted); font-size: 0.85rem; }
+
+.lap-cutoff {
+  padding: 2px 12px;
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.link-button {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 4px 6px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.link-button:disabled { cursor: not-allowed; opacity: 0.5; }
+.link-button:focus-visible { outline: 3px solid var(--text); outline-offset: 1px; }
+
+@media (max-width: 480px) {
+  .lap-row { grid-template-columns: 2ch 1fr auto; }
+  .lap-gap, .lap-row .link-button { grid-column: 2 / -1; justify-self: start; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .switch::after { transition: none; }
 }
