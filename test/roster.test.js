@@ -14,7 +14,7 @@ function groupSizes(roster) {
 }
 
 test('normalise fills in defaults for a bare name', () => {
-  assert.deepEqual(normalise([{ name: 'Kier' }]), [{ name: 'Kier', group: null, attending: true, locked: false }]);
+  assert.deepEqual(normalise([{ name: 'Kier' }]), [{ name: 'Kier', group: null, attending: true, locked: false, bestLapMs: null }]);
 });
 
 test('normalise keeps extra fields such as the stored id', () => {
