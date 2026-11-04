@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { changesBetween, isNameTaken, membersOf, normalise, shuffleIntoGroups, updateDriver } from '../roster.js';
 
-const GROUP_IDS = ['A', 'B', 'C', 'D'];
+const GROUP_IDS = ['A', 'B', 'C', 'D', 'E'];
 const names = (drivers) => drivers.map((driver) => driver.name).sort();
 
 function rosterOf(count, extra = {}) {
@@ -32,7 +32,7 @@ test('changesBetween lists only the fields that changed, per driver', () => {
 
 test('changesBetween is empty when nothing changed', () => {
   const roster = normalise([{ name: 'Kier', group: 'A' }]);
-  assert.deepEqual(changesBetween(roster, shuffleIntoGroups(roster, ['A'])), []);
+  assert.deepEqual(changesBetween(roster, shuffleIntoGroups(roster, ['A'], 5)), []);
 });
 
 test('isNameTaken ignores case and surrounding spaces', () => {
@@ -51,47 +51,43 @@ test('membersOf leaves out drivers who are not coming', () => {
   assert.deepEqual(names(membersOf(roster, 'A')), ['Kier']);
 });
 
-test('shuffling puts every driver who is coming into a group, with sizes at most one apart', () => {
-  for (const count of [4, 5, 14, 21, 22]) {
-    const shuffled = shuffleIntoGroups(rosterOf(count), GROUP_IDS);
-    const sizes = groupSizes(shuffled);
-    assert.equal(sizes.reduce((a, b) => a + b), count);
-    assert.ok(Math.max(...sizes) - Math.min(...sizes) <= 1, `uneven groups for ${count}: ${sizes}`);
-  }
+test('shuffling fills each group up to the rig count, in heat order', () => {
+  assert.deepEqual(groupSizes(shuffleIntoGroups(rosterOf(21), GROUP_IDS, 5)), [5, 5, 5, 5, 1]);
+  assert.deepEqual(groupSizes(shuffleIntoGroups(rosterOf(14), GROUP_IDS, 5)), [5, 5, 4, 0, 0]);
 });
 
-test('shuffling gives earlier groups the extra drivers', () => {
-  assert.deepEqual(groupSizes(shuffleIntoGroups(rosterOf(22), GROUP_IDS)), [6, 6, 5, 5]);
+test('drivers beyond what the rigs can take go to the smallest groups, earliest first', () => {
+  assert.deepEqual(groupSizes(shuffleIntoGroups(rosterOf(12), GROUP_IDS, 2)), [3, 3, 2, 2, 2]);
 });
 
 test('shuffling takes drivers who are not coming out of their group', () => {
   const roster = [...rosterOf(8), ...normalise([{ name: 'Sean', group: 'A', attending: false }])];
-  const sean = shuffleIntoGroups(roster, GROUP_IDS).find((driver) => driver.name === 'Sean');
+  const sean = shuffleIntoGroups(roster, GROUP_IDS, 5).find((driver) => driver.name === 'Sean');
   assert.equal(sean.group, null);
 });
 
 test('shuffling keeps locked drivers in their group and counts them towards its size', () => {
   const roster = [
-    ...rosterOf(20),
-    ...normalise([{ name: 'Nick', group: 'C', locked: true }, { name: 'Gervin', group: 'D', locked: true }]),
+    ...rosterOf(19),
+    ...normalise([{ name: 'Nick', group: 'C', locked: true }, { name: 'Gervin', group: 'E', locked: true }]),
   ];
   for (let run = 0; run < 50; run++) {
-    const shuffled = shuffleIntoGroups(roster, GROUP_IDS);
+    const shuffled = shuffleIntoGroups(roster, GROUP_IDS, 5);
     assert.equal(shuffled.find((driver) => driver.name === 'Nick').group, 'C');
-    assert.equal(shuffled.find((driver) => driver.name === 'Gervin').group, 'D');
-    assert.deepEqual(groupSizes(shuffled), [6, 6, 5, 5]);
+    assert.equal(shuffled.find((driver) => driver.name === 'Gervin').group, 'E');
+    assert.deepEqual(groupSizes(shuffled), [5, 5, 5, 5, 1]);
   }
 });
 
 test('a locked driver with no group is dealt like everyone else', () => {
   const roster = [...rosterOf(3), ...normalise([{ name: 'Kier', locked: true }])];
-  assert.notEqual(shuffleIntoGroups(roster, GROUP_IDS).find((driver) => driver.name === 'Kier').group, null);
+  assert.notEqual(shuffleIntoGroups(roster, GROUP_IDS, 5).find((driver) => driver.name === 'Kier').group, null);
 });
 
 test('shuffling actually mixes drivers across groups', () => {
   const seen = new Set();
   for (let run = 0; run < 200; run++) {
-    seen.add(shuffleIntoGroups(rosterOf(8), GROUP_IDS).find((driver) => driver.name === 'Driver 1').group);
+    seen.add(shuffleIntoGroups(rosterOf(10), GROUP_IDS, 2).find((driver) => driver.name === 'Driver 1').group);
   }
   assert.deepEqual([...seen].sort(), GROUP_IDS);
 });

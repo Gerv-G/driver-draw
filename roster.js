@@ -30,16 +30,17 @@ export function membersOf(roster, group) {
   return roster.filter((driver) => driver.attending && driver.group === group);
 }
 
-// Locked drivers keep their group. Everyone else who's coming is dealt into the
-// smallest group, earliest group first on a tie, so sizes never differ by more than one
-// unless the locked drivers already make them uneven.
-export function shuffleIntoGroups(roster, groupIds, random = cryptoRandom) {
+// Locked drivers keep their group. Everyone else who's coming fills the groups in heat
+// order, up to one driver per rig, so every heat but the last runs full. Drivers beyond
+// that capacity go to the smallest group, earliest first on a tie.
+export function shuffleIntoGroups(roster, groupIds, groupSize, random = cryptoRandom) {
   const staysPut = (driver) => driver.locked && driver.group !== null;
   const sizes = new Map(groupIds.map((id) => [id, membersOf(roster, id).filter(staysPut).length]));
+  const smallest = () => groupIds.reduce((best, id) => (sizes.get(id) < sizes.get(best) ? id : best));
 
   const assigned = new Map();
   for (const driver of shuffle(roster.filter((d) => d.attending && !staysPut(d)), random)) {
-    const group = groupIds.reduce((smallest, id) => (sizes.get(id) < sizes.get(smallest) ? id : smallest));
+    const group = groupIds.find((id) => sizes.get(id) < groupSize) ?? smallest();
     assigned.set(driver.name, group);
     sizes.set(group, sizes.get(group) + 1);
   }

@@ -1,4 +1,4 @@
-import { GROUP_IDS } from './groups.js';
+import { GROUP_IDS, RIGS_PER_HEAT } from './groups.js';
 import { membersOf, shuffleIntoGroups, updateDriver } from './roster.js';
 
 export function createGroupsView({ getRoster, setRoster, canWrite }) {
@@ -38,7 +38,7 @@ export function createGroupsView({ getRoster, setRoster, canWrite }) {
   document.querySelector('#shuffle-cancel').addEventListener('click', () => { confirmBar.hidden = true; });
   document.querySelector('#shuffle-go').addEventListener('click', () => {
     confirmBar.hidden = true;
-    setRoster(shuffleIntoGroups(getRoster(), GROUP_IDS));
+    setRoster(shuffleIntoGroups(getRoster(), GROUP_IDS, RIGS_PER_HEAT));
   });
 
   function fillDialog() {
