@@ -22,6 +22,24 @@ export function isPersonalBest(driver, ms) {
   return driver.bestLapMs === null || ms < driver.bestLapMs;
 }
 
+export function attemptsLeft(driver, maxAttempts) {
+  return Math.max(0, maxAttempts - driver.attempts);
+}
+
+// Every saved lap uses an attempt, faster or not. The state before the save is kept so a
+// mistyped time can be undone.
+export function recordAttempt(driver, ms) {
+  return {
+    attempts: driver.attempts + 1,
+    bestLapMs: isPersonalBest(driver, ms) ? ms : driver.bestLapMs,
+    lastSave: { attempts: driver.attempts, bestLapMs: driver.bestLapMs },
+  };
+}
+
+export function undoLastSave(driver) {
+  return { attempts: driver.lastSave.attempts, bestLapMs: driver.lastSave.bestLapMs, lastSave: null };
+}
+
 export function leaderboard(roster) {
   return roster
     .filter((driver) => driver.attending && driver.bestLapMs !== null)

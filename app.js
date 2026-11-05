@@ -1,6 +1,5 @@
 import { changesBetween, normalise } from './roster.js';
 import { createAttendeesView } from './attendees-view.js';
-import { createDrawView } from './draw-view.js';
 import { createGroupsView } from './groups-view.js';
 import { createLapsView } from './laps-view.js';
 
@@ -41,17 +40,17 @@ function setRoster(next) {
 async function addDriver(name) {
   if (!canWrite()) return;
   try {
-    await drivers.add({ name, attending: true, group: null, locked: false, bestLapMs: null });
+    await drivers.add({ name, attending: true, group: null, locked: false, bestLapMs: null, attempts: 0, lastSave: null });
   } catch (error) {
     handleSaveError(error, name);
   }
 }
 
-async function saveLap(name, bestLapMs) {
+async function saveLap(name, fields) {
   if (!canWrite()) return false;
   const driver = roster.find((d) => d.name === name);
   try {
-    await drivers.doc(driver.id).update({ bestLapMs });
+    await drivers.doc(driver.id).update(fields);
     return true;
   } catch (error) {
     handleSaveError(error, `${name}'s lap time`);
@@ -63,7 +62,6 @@ const views = [
   createAttendeesView({ getRoster: () => roster, setRoster, addDriver, canWrite }),
   createGroupsView({ getRoster: () => roster, setRoster, canWrite }),
   createLapsView({ getRoster: () => roster, saveLap, canWrite }),
-  createDrawView(() => roster),
 ];
 
 function render() {

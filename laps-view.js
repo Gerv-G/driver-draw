@@ -1,7 +1,7 @@
-import { RIGS_PER_HEAT } from './groups.js';
-import { formatGap, formatLapTime, isPersonalBest, leaderboard, parseLapTime } from './laptimes.js';
+import { FINALISTS, MAX_ATTEMPTS, groupLabel } from './groups.js';
+import { attemptsLeft, formatGap, formatLapTime, isPersonalBest, leaderboard, parseLapTime, recordAttempt, undoLastSave } from './laptimes.js';
 
-const CLEAR_CONFIRM_MS = 3000;
+const UNDO_CONFIRM_MS = 3000;
 
 export function createLapsView({ getRoster, saveLap, canWrite }) {
   const form = document.querySelector('#lap-form');
@@ -11,8 +11,12 @@ export function createLapsView({ getRoster, saveLap, canWrite }) {
   const message = document.querySelector('#lap-message');
   const board = document.querySelector('#leaderboard');
   const empty = document.querySelector('#leaderboard-empty');
-  let confirmingClear = null;
+  const untimed = document.querySelector('#untimed');
+  let confirmingUndo = null;
   let optionsKey = null;
+
+  const rigOf = (driver) => (driver.group === null ? 'no rig' : groupLabel(driver.group));
+  const attemptsText = (driver) => `${driver.attempts} of ${MAX_ATTEMPTS} attempts`;
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -22,91 +26,104 @@ export function createLapsView({ getRoster, saveLap, canWrite }) {
       message.textContent = 'Pick the driver first.';
       return;
     }
+    if (attemptsLeft(driver, MAX_ATTEMPTS) === 0) {
+      message.textContent = `${driver.name} has used all ${MAX_ATTEMPTS} attempts.`;
+      return;
+    }
     if (ms === null) {
       message.textContent = 'Type the time as it shows on screen, like 2:31.402.';
       return;
     }
-    if (!isPersonalBest(driver, ms)) {
-      message.textContent = `${formatLapTime(ms)} isn't faster than ${driver.name}'s best of ${formatLapTime(driver.bestLapMs)}, so it wasn't saved.`;
-      return;
-    }
+    const faster = isPersonalBest(driver, ms);
     saveButton.disabled = true;
-    if (await saveLap(driver.name, ms)) {
-      message.textContent = `Saved ${driver.name}: ${formatLapTime(ms)}.`;
+    if (await saveLap(driver.name, recordAttempt(driver, ms))) {
+      const attempt = `attempt ${driver.attempts + 1} of ${MAX_ATTEMPTS}`;
+      message.textContent = faster
+        ? `Saved ${driver.name}'s ${attempt}: ${formatLapTime(ms)}, a new best.`
+        : `Saved ${driver.name}'s ${attempt}: ${formatLapTime(ms)}. Their best is still ${formatLapTime(driver.bestLapMs)}.`;
       timeInput.value = '';
     }
     saveButton.disabled = !canWrite();
   });
 
-  function clearButton(driver) {
+  function undoButton(driver) {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'link-button';
     button.disabled = !canWrite();
-    button.textContent = confirmingClear === driver.name ? 'Tap again to clear' : 'Clear';
-    button.setAttribute('aria-label', `Clear ${driver.name}'s time`);
+    button.textContent = confirmingUndo === driver.name ? 'Tap again to undo' : 'Undo last';
+    button.setAttribute('aria-label', `Undo ${driver.name}'s last saved lap`);
     button.addEventListener('click', async () => {
-      if (confirmingClear !== driver.name) {
-        confirmingClear = driver.name;
+      if (confirmingUndo !== driver.name) {
+        confirmingUndo = driver.name;
         render();
         setTimeout(() => {
-          if (confirmingClear === driver.name) {
-            confirmingClear = null;
+          if (confirmingUndo === driver.name) {
+            confirmingUndo = null;
             render();
           }
-        }, CLEAR_CONFIRM_MS);
+        }, UNDO_CONFIRM_MS);
         return;
       }
-      confirmingClear = null;
-      if (await saveLap(driver.name, null)) message.textContent = `Cleared ${driver.name}'s time.`;
+      confirmingUndo = null;
+      if (await saveLap(driver.name, undoLastSave(driver))) message.textContent = `Undid ${driver.name}'s last saved lap.`;
     });
     return button;
   }
 
+  function cell(className, text) {
+    const span = document.createElement('span');
+    span.className = className;
+    span.textContent = text;
+    return span;
+  }
+
   function row(driver, position, leaderMs) {
     const item = document.createElement('li');
-    item.className = position <= RIGS_PER_HEAT ? 'lap-row finalist' : 'lap-row';
-    const place = document.createElement('span');
-    place.className = 'lap-place';
-    place.textContent = String(position);
-    const name = document.createElement('span');
-    name.className = 'lap-name';
-    name.textContent = driver.name;
-    const time = document.createElement('span');
-    time.className = 'lap-time';
-    time.textContent = formatLapTime(driver.bestLapMs);
-    const gap = document.createElement('span');
-    gap.className = 'lap-gap';
-    gap.textContent = position === 1 ? 'Fastest' : formatGap(driver.bestLapMs - leaderMs);
-    item.append(place, name, time, gap, clearButton(driver));
+    item.className = position <= FINALISTS ? 'lap-row finalist' : 'lap-row';
+    const who = cell('lap-name', driver.name);
+    who.append(cell('lap-detail', ` · ${rigOf(driver)} · ${attemptsText(driver)}`));
+    item.append(
+      cell('lap-place', String(position)),
+      who,
+      cell('lap-time', formatLapTime(driver.bestLapMs)),
+      cell('lap-gap', position === 1 ? 'Fastest' : formatGap(driver.bestLapMs - leaderMs)),
+      driver.lastSave ? undoButton(driver) : cell('lap-undo-gap', ''),
+    );
     return item;
   }
 
-  function renderDriverOptions(roster) {
-    const coming = roster.filter((driver) => driver.attending).sort((a, b) => a.name.localeCompare(b.name));
+  function renderDriverOptions(coming) {
     // Rebuilding the list on every live update would close it under whoever is picking
-    const key = coming.map((driver) => driver.name).join('\n');
+    const key = coming.map((driver) => `${driver.name}|${driver.group}|${driver.attempts}`).join('\n');
     if (key === optionsKey) return;
     optionsKey = key;
     const selected = driverSelect.value;
-    const prompt = new Option('Pick a driver', '');
-    driverSelect.replaceChildren(prompt, ...coming.map((driver) => new Option(driver.name, driver.name)));
+    const options = coming.map((driver) => new Option(`${driver.name} (${rigOf(driver)}, ${attemptsText(driver)})`, driver.name));
+    driverSelect.replaceChildren(new Option('Pick a driver', ''), ...options);
     driverSelect.value = coming.some((driver) => driver.name === selected) ? selected : '';
   }
 
   function render() {
-    const roster = getRoster();
-    renderDriverOptions(roster);
-    const ranked = leaderboard(roster);
+    const coming = getRoster().filter((driver) => driver.attending).sort((a, b) => a.name.localeCompare(b.name));
+    renderDriverOptions(coming);
+
+    const ranked = leaderboard(coming);
     empty.hidden = ranked.length > 0;
     const rows = ranked.map((driver, i) => row(driver, i + 1, ranked[0].bestLapMs));
-    if (ranked.length > RIGS_PER_HEAT) {
+    if (ranked.length > FINALISTS) {
       const cutoff = document.createElement('li');
       cutoff.className = 'lap-cutoff';
-      cutoff.textContent = `Top ${RIGS_PER_HEAT} go to the final`;
-      rows.splice(RIGS_PER_HEAT, 0, cutoff);
+      cutoff.textContent = `Top ${FINALISTS} go to the final`;
+      rows.splice(FINALISTS, 0, cutoff);
     }
     board.replaceChildren(...rows);
+
+    const waiting = coming.filter((driver) => driver.bestLapMs === null);
+    untimed.textContent = waiting.length === 0 || ranked.length === 0
+      ? ''
+      : `No time yet: ${waiting.map((driver) => `${driver.name} (${rigOf(driver)})`).join(', ')}`;
+
     for (const control of [driverSelect, timeInput, saveButton]) control.disabled = !canWrite();
   }
 

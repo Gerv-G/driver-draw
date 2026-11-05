@@ -1,4 +1,4 @@
-import { GROUP_IDS, RIGS_PER_HEAT } from './groups.js';
+import { GROUP_IDS, groupLabel } from './groups.js';
 import { membersOf, shuffleIntoGroups, updateDriver } from './roster.js';
 
 export function createGroupsView({ getRoster, setRoster, canWrite }) {
@@ -15,7 +15,7 @@ export function createGroupsView({ getRoster, setRoster, canWrite }) {
   groupPicker.append(...GROUP_IDS.map((id) => {
     const label = document.createElement('label');
     label.className = 'pick';
-    label.style.setProperty('--group-color', `var(--group-${id.toLowerCase()})`);
+    label.style.setProperty('--group-color', `var(--group-${id})`);
     const radio = document.createElement('input');
     radio.type = 'radio';
     radio.name = 'group';
@@ -38,7 +38,7 @@ export function createGroupsView({ getRoster, setRoster, canWrite }) {
   document.querySelector('#shuffle-cancel').addEventListener('click', () => { confirmBar.hidden = true; });
   document.querySelector('#shuffle-go').addEventListener('click', () => {
     confirmBar.hidden = true;
-    setRoster(shuffleIntoGroups(getRoster(), GROUP_IDS, RIGS_PER_HEAT));
+    setRoster(shuffleIntoGroups(getRoster(), GROUP_IDS));
   });
 
   function fillDialog() {
@@ -88,9 +88,9 @@ export function createGroupsView({ getRoster, setRoster, canWrite }) {
 
   function render() {
     const roster = getRoster();
-    const cards = GROUP_IDS.map((id) => card(`Group ${id}`, membersOf(roster, id), `var(--group-${id.toLowerCase()})`));
+    const cards = GROUP_IDS.map((id) => card(groupLabel(id), membersOf(roster, id), `var(--group-${id})`));
     const noGroup = roster.filter((driver) => driver.attending && driver.group === null);
-    if (noGroup.length > 0) cards.push(card('No group yet', noGroup, 'var(--muted)'));
+    if (noGroup.length > 0) cards.push(card('No rig yet', noGroup, 'var(--muted)'));
     board.replaceChildren(...cards);
 
     const away = roster.filter((driver) => !driver.attending).length;
