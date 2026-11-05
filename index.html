@@ -1,6 +1,6 @@
 <title>Driver Draw</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Who's coming, which qualifier group they're in, and the draw for a retired driver's rig.">
+<meta name="description" content="Who's coming, which rig they queue for, and everyone's best qualifying lap.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700&display=swap">
@@ -13,9 +13,8 @@
     <h1>Driver Draw</h1>
     <nav class="tabs" aria-label="Pages">
       <a href="#attendees">Attendees</a>
-      <a href="#groups">Groups</a>
+      <a href="#groups">Rigs</a>
       <a href="#laps">Lap times</a>
-      <a href="#draw">Draw</a>
     </nav>
   </header>
 
@@ -23,7 +22,7 @@
 
   <section id="attendees-panel" aria-labelledby="attendees-heading">
     <h2 id="attendees-heading">Attendees</h2>
-    <p class="hint">Who's driving today. Groups and the draw only include people marked as coming. Changes show up for everyone straight away.</p>
+    <p class="hint">Who's driving today. Rigs and lap times only include people marked as coming. Changes show up for everyone straight away.</p>
     <p id="attendee-summary" class="summary">Loading drivers…</p>
     <ul id="attendee-list" class="attendees"></ul>
     <form id="add-driver" class="add-driver" novalidate>
@@ -37,8 +36,8 @@
   </section>
 
   <section id="groups-panel" aria-labelledby="groups-heading" hidden>
-    <h2 id="groups-heading">Qualifier groups</h2>
-    <p class="hint">Groups drive in order, A first, one driver per regular rig. Tap a driver to move them or lock them in their group. Shuffle fills the groups in order and leaves locked drivers where they are.</p>
+    <h2 id="groups-heading">Rig groups</h2>
+    <p class="hint">During qualifying, each group takes turns on its own rig. Tap a driver to move them to another rig or lock them on theirs. Shuffling leaves locked drivers where they are.</p>
     <div class="toolbar">
       <button id="shuffle" class="spin" type="button">Shuffle</button>
     </div>
@@ -56,9 +55,9 @@
       <form method="dialog">
         <h3 id="driver-name"></h3>
         <fieldset id="group-picker" class="picker">
-          <legend>Group</legend>
+          <legend>Rig</legend>
         </fieldset>
-        <label class="toggle"><input id="locked" type="checkbox"> Lock in this group when shuffling</label>
+        <label class="toggle"><input id="locked" type="checkbox"> Lock on this rig when shuffling</label>
         <button class="spin" type="submit">Done</button>
       </form>
     </dialog>
@@ -66,7 +65,7 @@
 
   <section id="laps-panel" aria-labelledby="laps-heading" hidden>
     <h2 id="laps-heading">Lap times</h2>
-    <p class="hint">Each driver's fastest lap so far. Save a time after every attempt: only a faster lap replaces their best.</p>
+    <p class="hint">Each driver's fastest lap so far. Save the time after every attempt, up to 5 per driver. Every saved lap uses an attempt, and only a faster one replaces their best.</p>
     <form id="lap-form" class="lap-form" novalidate>
       <div class="lap-fields">
         <label for="lap-driver">Driver</label>
@@ -74,25 +73,12 @@
         <label for="lap-time">Lap time</label>
         <input id="lap-time" type="text" inputmode="decimal" autocomplete="off" placeholder="2:31.402" maxlength="10">
       </div>
-      <button id="lap-save" class="spin" type="submit">Save lap</button>
+      <button id="lap-save" class="spin" type="submit">Save attempt</button>
       <p id="lap-message" class="lap-message" aria-live="polite"></p>
     </form>
     <p id="leaderboard-empty" class="hint">No lap times yet. The first saved lap shows up here.</p>
     <ol id="leaderboard" class="leaderboard"></ol>
+    <p id="untimed" class="hint"></p>
   </section>
 
-  <section id="draw-panel" aria-labelledby="draw-heading" hidden>
-    <h2 id="draw-heading">Retirement draw</h2>
-    <p class="hint">A driver retired? Pick the groups to draw from, then spin for who gets the rest of the session. Untick a group to leave it out. Tap a name to leave out one driver.</p>
-    <div id="draw-groups" class="groups"></div>
-
-    <div class="track" aria-label="Roulette">
-      <div class="wheel">
-        <div class="pointer" aria-hidden="true"></div>
-        <svg id="rotor" viewBox="-100 -100 200 200" role="img" aria-label="Roulette wheel"></svg>
-      </div>
-      <button id="spin" class="spin" type="button">Spin</button>
-      <p id="result" class="result" aria-live="polite"></p>
-    </div>
-  </section>
 </main>

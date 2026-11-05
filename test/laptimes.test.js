@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { formatGap, formatLapTime, isPersonalBest, leaderboard, parseLapTime } from '../laptimes.js';
+import { attemptsLeft, formatGap, formatLapTime, isPersonalBest, leaderboard, parseLapTime, recordAttempt, undoLastSave } from '../laptimes.js';
 import { normalise } from '../roster.js';
 
 test('parseLapTime reads minutes, seconds and thousandths', () => {
@@ -50,4 +50,28 @@ test('leaderboard ranks drivers who are coming and have a time, fastest first', 
     { name: 'Gab', bestLapMs: 152000 },
   ]);
   assert.deepEqual(leaderboard(roster).map((driver) => driver.name), ['Kier', 'Gab', 'Rob']);
+});
+
+test('every saved lap uses an attempt, and only a faster one replaces the best', () => {
+  const [driver] = normalise([{ name: 'Kier', attempts: 1, bestLapMs: 151402 }]);
+  assert.deepEqual(recordAttempt(driver, 150000), { attempts: 2, bestLapMs: 150000, lastSave: { attempts: 1, bestLapMs: 151402 } });
+  assert.deepEqual(recordAttempt(driver, 160000), { attempts: 2, bestLapMs: 151402, lastSave: { attempts: 1, bestLapMs: 151402 } });
+});
+
+test('a first lap becomes the best', () => {
+  const [driver] = normalise([{ name: 'Kier' }]);
+  assert.deepEqual(recordAttempt(driver, 151402), { attempts: 1, bestLapMs: 151402, lastSave: { attempts: 0, bestLapMs: null } });
+});
+
+test('undoing the last save puts the attempt and the best lap back', () => {
+  const [driver] = normalise([{ name: 'Kier', attempts: 1, bestLapMs: 151402 }]);
+  const saved = { ...driver, ...recordAttempt(driver, 15140) };
+  assert.deepEqual(undoLastSave(saved), { attempts: 1, bestLapMs: 151402, lastSave: null });
+});
+
+test('attemptsLeft counts down to zero and no further', () => {
+  const [driver] = normalise([{ name: 'Kier', attempts: 3 }]);
+  assert.equal(attemptsLeft(driver, 5), 2);
+  assert.equal(attemptsLeft({ ...driver, attempts: 5 }, 5), 0);
+  assert.equal(attemptsLeft({ ...driver, attempts: 6 }, 5), 0);
 });

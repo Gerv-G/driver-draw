@@ -2,11 +2,13 @@
 
 Tools for the year-end sim racing qualifiers, published as a claude.ai artifact: https://claude.ai/artifact/PP8jF7TJBSixqeGX4pJbEp
 
-- **Attendees**: who's coming. Groups and the draw only include people marked as coming. Walk-ins can be added here
-- **Groups**: who's in which qualifier group. Tap a driver to move them (e.g. they're late, so they go in a later group) or lock them in their group. Shuffle deals everyone who's coming and isn't locked into balanced groups
-- **Draw**: when a driver retires from their heat, spin to pick who gets the rest of their rig's session as free practice
+- **Attendees**: who's coming. Rigs and lap times only include people marked as coming. Walk-ins can be added here
+- **Rigs**: which rig each driver queues for during qualifying, one group per rig. Tap a driver to move them or lock them on their rig. Shuffle deals everyone who's coming and isn't locked evenly across the rigs
+- **Lap times**: save each attempt's lap time, up to 5 attempts per driver. Only a faster lap replaces a driver's best, and the leaderboard marks the top 6 who go to the final. The last save can be undone
 
-The drivers live in the artifact's shared database (`drivers` collection, one document per driver), so every open copy updates live. The artifact is private: people need it shared with them on claude.ai, as Contributors to make changes. The page only works inside claude.ai. It used to run on GitHub Pages, which is now turned off.
+The drivers live in the artifact's shared database (`drivers` collection, one document per driver), so every open copy updates live. The artifact is private: people need it shared with them on claude.ai, as Contributors to make changes. The page only works inside claude.ai.
+
+The venue setup (rigs, attempts, finalists) is in [groups.js](groups.js).
 
 ## Publishing changes
 
